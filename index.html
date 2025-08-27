@@ -6,7 +6,8 @@
   <title>Pump Controller – Realtime Web Panel</title>
   <style>
     :root{
-      --bg:#0e131b; --card:#131a24; --muted:#232e3e; --text:#e6eefc; --sub:#9fb0c9; --good:#20c997; --bad:#e25563; --warn:#f7b955; --accent:#4cc9f0;
+      --bg:#0e131b; --card:#131a24; --muted:#232e3e; --text:#e6eefc; --sub:#9fb0c9;
+      --good:#20c997; --bad:#e25563; --warn:#f7b955; --accent:#4cc9f0; --mcbcol:#2f8fd0;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -18,11 +19,12 @@
     .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
     .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:var(--muted);color:var(--text);font-weight:700}
     .pill small{opacity:.75;font-weight:600}
-    .big{font-size:42px;font-weight:800}
-    button{appearance:none;border:0;border-radius:14px;padding:12px 16px;font-weight:800;cursor:pointer;background:#1f2a3a;color:var(--text);transition:.15s transform,.15s filter}
+    .big{font-size:50px;font-weight:800}
+    .big1{font-size:40px;font-weight:800}
+    button{appearance:none;border:0;border-radius:14px;padding:6px 8px;font-weight:800;cursor:pointer;background:#1f2a3a;color:var(--text);transition:.15s transform,.15s filter}
     button.primary{background:var(--good)}
     button.secondary{background:var(--bad)}
-    button.ghost{background:transparent;border:1px solid #334155}
+    button.ghost{background:var(--mcbcol);border:1px solid #334155}
     button:active{transform:scale(.98)}
     button[disabled]{opacity:.6;cursor:not-allowed;filter:grayscale(.3)}
     input[type="number"], input[type="text"]{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #31455f;background:#0f1722;color:var(--text)}
@@ -39,13 +41,29 @@
     a.small{color:var(--accent);text-decoration:none}
     .footer{opacity:.6;margin-top:18px;font-size:12px}
     .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#0c1420;border:1px solid #263346;border-radius:8px;padding:2px 6px}
+
+    /* 🔥 Blinking style for Start/Stop/MCB buttons */
+    .blink {
+      animation: blink 1s infinite;
+      background: transparent !important;
+      border: 2px solid currentColor !important;
+    }
+    .blink.start { color: var(--good) !important; }
+    .blink.stop  { color: var(--bad) !important; }
+    .blink.mcb   { color: var(--mcbcol) !important; }
+
+    @keyframes blink {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0.3; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1 style="margin:0 0 8px;font-size:22px">Pump Controller – Web Panel</h1>
     <div class="row" style="gap:8px;margin-bottom:14px">
-      <span class="pill"><small>Wi‑Fi</small><span id="wifiState">—</span></span>
+      <span class="pill"><small>Wi-Fi</small><span id="wifiState">—</span></span>
+      <span class="pill"><small>Volt</small><span id="volt">—</span></span>
       <span class="pill"><small>MCB</small><span id="mcbStateTxt">—</span></span>
       <span class="pill"><small>Motor</small><span id="motorTxt">—</span></span>
       <span class="pill"><small>Last Sync</small><span id="lastSync">—</span></span>
@@ -63,19 +81,29 @@
             </div>
           </div>
         </div>
-        <div class="row" style="justify-content:space-between;margin-top:10px">
+        <div class="row" style="justify-content:space-between;margin-top:10px;margin-bottom: 10px;">
           <div>Distance <span class="kbd" id="tSensor">—</span> cm</div>
           <div>Capacity <input id="capacity" type="number" min="1" value="320" style="width:90px"/> L</div>
         </div>
+
+        <div class="row" style="gap:10px;flex-wrap:wrap">
+          <button class="primary" id="btnStart">START</button>
+          <button class="secondary" id="btnStop">STOP</button>
+          <button class="ghost" id="btnMcb">Toggle MCB</button>
+        </div>
+
       </div>
+
+
 
       <div class="card">
         <h3 class="title">Electrical</h3>
         <div class="row" style="align-items:center;gap:10px">
           <div class="dot" id="voltDot"></div>
-          <div class="big" id="volt">—</div>
+          <div class="big1" id="volt1">—</div>
           <div>Volt</div>
         </div>
+
         <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:12px">
           <div>
             <label>V Min</label>
@@ -100,38 +128,43 @@
         <p class="status" id="oled">—</p>
       </div>
 
+            <div class="card">
+        <h3 class="title">Usage History</h3>
+
+        <iframe width="100%" height="260" style="border: 0px solid #cccccc;" src="https://thingspeak.com/channels/2595192/charts/1?bgcolor=%23131a24&color=%23d62020&dynamic=true&max=100&min=0&results=1000&timescale=30&title=Usage&type=line"></iframe>
+      </div>
+
       <div class="card">
-        <h3 class="title">Controls</h3>
+        <h3 class="title">Controls Pump 2</h3>
         <div class="row" style="gap:10px;flex-wrap:wrap">
-          <button class="primary" id="btnStart">START</button>
-          <button class="secondary" id="btnStop">STOP</button>
-          <button class="ghost" id="btnMcb">Toggle MCB</button>
+          <button class="primary" id="btnStart2">START</button>
+          <button class="secondary" id="btnStop2">STOP</button>
+          <button class="ghost" id="btnMcb2">Toggle MCB</button>
         </div>
         <div class="footer">Actions write to Realtime DB keys: <span class="kbd">mStart</span>, <span class="kbd">mStop</span>, <span class="kbd">mcb</span>, <span class="kbd">autoStart</span>, <span class="kbd">autoStop</span>, <span class="kbd">vMin</span>, <span class="kbd">vMax</span>.</div>
       </div>
 
-      <div class="card">
+      
+
+            <div class="card">
         <h3 class="title">Connection</h3>
         <label>Database URL (readonly)</label>
         <input type="text" value="https://pump-df434-default-rtdb.firebaseio.com" readonly>
-        <label>Legacy Token (kept client‑side for demo)</label>
+        <label>Legacy Token (kept client-side for demo)</label>
         <input id="token" type="text" value="0ZB4vWAKGAWXlGpG0elqZXBpj1nV3t7th4NM4pX2">
         <div class="row" style="margin-top:10px;gap:10px">
           <button id="reconnect">Reconnect</button>
           <a class="small" href="#" id="copyURL">Copy REST URL</a>
         </div>
-      </div>
     </div>
 
-    <p class="footer">© 2025 All Rights Reserved <span class="kbd">Joel Jana - Aqua Sense</span> on GitHub Pages. All calls use Firebase REST.</p>
+    <p class="footer">Tip: host this file as <span class="kbd">index.html</span> on GitHub Pages. All calls use Firebase REST.</p>
   </div>
 
   <script>
-    // === CONFIG (REST) ===
     const DB = "https://pump-df434-default-rtdb.firebaseio.com";
     let TOKEN = document.getElementById('token').value.trim();
 
-    // Helpers
     const $ = (id)=>document.getElementById(id);
     const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
 
@@ -153,7 +186,6 @@
 
     function updateUI(snap){
       if(!snap) return;
-      // Read keys (with defaults)
       const volt = Number(snap.volt ?? 0);
       const wPercent = Number(snap.wPercent ?? 0);
       const tSensor = Number((snap.setup && snap.setup.tSensor) ?? (snap.tSensor ?? 0));
@@ -166,6 +198,7 @@
       const oled = String(snap.oled1 ?? '—');
 
       $('volt').textContent = fmt(volt);
+      $('volt1').textContent = fmt(volt);
       $('tSensor').textContent = isFinite(tSensor)? tSensor : '—';
       $('mcbStateTxt').textContent = mcb? 'ON' : 'OFF';
       $('motorTxt').textContent = mState? 'RUNNING' : 'STOPPED';
@@ -174,11 +207,9 @@
       $('vMin').value = vMin; $('vMax').value = vMax;
       $('autoStart').value = autoStart; $('autoStop').value = autoStop;
 
-      // Voltage dot
       const dot = $('voltDot');
       dot.className = 'dot ' + (volt < 50 ? 'bad' : (volt < vMin || volt > vMax) ? 'warn' : 'ok');
 
-      // Tank visuals
       const cap = Math.max(1, Number($('capacity').value || 320));
       const liters = Math.round(cap * wPercent / 100);
       $('percent').textContent = `${fmt(wPercent)}%`;
@@ -186,6 +217,31 @@
       $('water').style.height = `${Math.max(0,Math.min(100,wPercent))}%`;
 
       $('lastSync').textContent = new Date().toLocaleTimeString();
+
+      // 🔥 Blink logic
+      if (snap.mStart == 1) {
+        $('btnStart').classList.add('blink','start');
+        $('btnStart2').classList.add('blink','start');
+      } else {
+        $('btnStart').classList.remove('blink','start');
+        $('btnStart2').classList.remove('blink','start');
+      }
+
+      if (snap.mStop == 1) {
+        $('btnStop').classList.add('blink','stop');
+        $('btnStop2').classList.add('blink','stop');
+      } else {
+        $('btnStop').classList.remove('blink','stop');
+        $('btnStop2').classList.remove('blink','stop');
+      }
+
+      if (snap.mcb == 0) {
+        $('btnMcb').classList.add('blink','mcb');
+        $('btnMcb2').classList.add('blink','mcb');
+      } else {
+        $('btnMcb').classList.remove('blink','mcb');
+        $('btnMcb2').classList.remove('blink','mcb');
+      }
     }
 
     async function pull(){
@@ -200,7 +256,6 @@
     }
 
     async function write(obj){
-      // PATCH top‑level
       try{
         await rest('/', 'PATCH', obj);
         await pull();
@@ -209,7 +264,6 @@
       }
     }
 
-    // Polling loop
     let stopLoop=false;
     async function loop(){
       while(!stopLoop){
@@ -218,17 +272,16 @@
       }
     }
 
-    // Controls
-    $('btnStart').onclick = ()=>write({ mStart: 1 });
-    $('btnStop').onclick  = ()=>write({ mStop: 1  });
-    $('btnMcb').onclick   = async()=>{
+    // Buttons (both sets)
+    $('btnStart').onclick = $('btnStart2').onclick = ()=>write({ mStart: 1 });
+    $('btnStop').onclick  = $('btnStop2').onclick  = ()=>write({ mStop: 1  });
+    $('btnMcb').onclick   = $('btnMcb2').onclick   = async()=>{
       const snap = await rest('/', 'GET');
       const next = snap.mcb? 0 : 1;
       write({ mcb: next, oled1: next? "'Pump is Ready to Start'" : "'Warning : MCB is off'" });
     };
 
     $('saveCfg').onclick = ()=>{
-      // Clamp values
       const aS = Math.max(0, Math.min(100, Number($('autoStart').value||0)));
       const aP = Math.max(0, Math.min(100, Number($('autoStop').value||0)));
       const vN = Number($('vMin').value||160);
@@ -246,7 +299,6 @@
       navigator.clipboard.writeText(url).then(()=>{ alert('Copied REST URL to clipboard'); });
     };
 
-    // Start
     pull();
     loop();
   </script>
